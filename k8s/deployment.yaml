@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: web-app
-        image: cloud-native-app:v1
-        imagePullPolicy: Never # Tells Minikube to look for the image locally on your laptop
+        image: YOUR_DOCKERHUB_USERNAME/cloud-native-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         livenessProbe:

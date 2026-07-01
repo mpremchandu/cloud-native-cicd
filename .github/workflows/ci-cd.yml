@@ -1,0 +1,42 @@
+name: Cloud-Native CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js Environment
+      uses: actions/workspace/.github/workflows@v4
+      with:
+        node-version: 20
+
+    - name: Install Dependencies & Run Linter/Tests
+      run: |
+        npm ci
+        # You can add npm test here later if you add testing suites
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        # This tags the image with both 'latest' and the unique GitHub commit hash
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-app:${{ github.sha }}
